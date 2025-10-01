@@ -42,21 +42,18 @@ export async function GET(request: NextRequest) {
 
   // Get folder ID from query parameters
   const { searchParams } = new URL(request.url)
-  const folderId = searchParams.get("folderId") || "root"
+  const folderId = searchParams.get("folderId")
+
+  if (!folderId) {
+    return NextResponse.json({ 
+      error: "Folder ID is required" 
+    }, { status: 400 })
+  }
 
   try {
-    // Build query parameters for Google Drive API
-    const queryParams = new URLSearchParams({
-      pageSize: "50",
-      fields: "files(id,name,mimeType,modifiedTime,size,webViewLink,iconLink,parents)",
-      q: folderId === "root" 
-        ? "'root' in parents and trashed=false"
-        : `'${folderId}' in parents and trashed=false`
-    })
-
     // First attempt with current access token
     let response = await fetch(
-      `https://www.googleapis.com/drive/v3/files?${queryParams}`,
+      `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,parents`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -80,7 +77,7 @@ export async function GET(request: NextRequest) {
         
         // Retry the request with new token
         response = await fetch(
-          `https://www.googleapis.com/drive/v3/files?${queryParams}`,
+          `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,parents`,
           {
             headers: {
               Authorization: `Bearer ${newAccessToken}`,
@@ -112,9 +109,9 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Error fetching files:", error)
+    console.error("Error fetching folder info:", error)
     return NextResponse.json({ 
-      error: "Failed to fetch files from Google Drive. Please try again." 
+      error: "Failed to fetch folder information. Please try again." 
     }, { status: 500 })
   }
 }
