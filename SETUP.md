@@ -20,7 +20,7 @@ This application integrates with Google Drive to allow users to view and manage 
 3. Configure the OAuth consent screen if prompted
 4. Choose "Web application" as the application type
 5. Add authorized redirect URIs:
-   - For local development: `http://localhost:3000/api/auth/google/callback`
+   - For local development: `http://localhost:4000/api/auth/google/callback`
    - For production: `https://yourdomain.com/api/auth/google/callback`
 6. Copy the Client ID and Client Secret
 
@@ -31,7 +31,7 @@ Create a `.env.local` file in the root of your project and add:
 \`\`\`env
 GOOGLE_CLIENT_ID=your_client_id_here
 GOOGLE_CLIENT_SECRET=your_client_secret_here
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:4000
 \`\`\`
 
 For production, update `NEXT_PUBLIC_APP_URL` to your actual domain.

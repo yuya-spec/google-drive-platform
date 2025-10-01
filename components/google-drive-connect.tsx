@@ -30,6 +30,9 @@ export function GoogleDriveConnect() {
       .then((res) => {
         if (res.ok) {
           setIsConnected(true)
+        } else if (res.status === 401) {
+          setIsConnected(false)
+          setMessage({ type: "error", text: "Authentication expired. Please reconnect." })
         }
       })
       .catch(() => {
@@ -39,6 +42,14 @@ export function GoogleDriveConnect() {
 
   const handleConnect = () => {
     window.location.href = "/api/auth/google"
+  }
+
+  const handleDisconnect = () => {
+    // Clear cookies by setting them to expire
+    document.cookie = "google_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+    document.cookie = "google_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+    setIsConnected(false)
+    setMessage({ type: "success", text: "Disconnected from Google Drive" })
   }
 
   return (
@@ -59,13 +70,24 @@ export function GoogleDriveConnect() {
           <p className="font-medium text-foreground">Status</p>
           <p className="text-sm text-muted-foreground">{isConnected ? "Connected" : "Not connected"}</p>
         </div>
-        <Button
-          onClick={handleConnect}
-          disabled={isConnected}
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
-        >
-          {isConnected ? "Connected" : "Connect Google Drive"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleConnect}
+            disabled={isConnected}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            {isConnected ? "Connected" : "Connect Google Drive"}
+          </Button>
+          {isConnected && (
+            <Button
+              onClick={handleDisconnect}
+              variant="outline"
+              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              Disconnect
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

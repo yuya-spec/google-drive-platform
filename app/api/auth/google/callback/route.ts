@@ -5,12 +5,23 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code")
   const error = searchParams.get("error")
 
+  // Get the base URL from the request or environment
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${request.nextUrl.protocol}//${request.nextUrl.host}`
+  const redirectUri = `${baseUrl}/api/auth/google/callback`
+
+  console.log("Callback Configuration:", {
+    baseUrl,
+    redirectUri,
+    code: code ? "✅ Present" : "❌ Missing",
+    error: error || "None"
+  })
+
   if (error) {
-    return NextResponse.redirect(new URL("/dashboard/settings?error=access_denied", request.url))
+    return NextResponse.redirect(new URL("/dashboard/settings?error=access_denied", baseUrl))
   }
 
   if (!code) {
-    return NextResponse.redirect(new URL("/dashboard/settings?error=no_code", request.url))
+    return NextResponse.redirect(new URL("/dashboard/settings?error=no_code", baseUrl))
   }
 
   try {
@@ -24,7 +35,7 @@ export async function GET(request: NextRequest) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID!,
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirect_uri: process.env.NEXT_PUBLIC_APP_URL + "/api/auth/google/callback",
+        redirect_uri: redirectUri,
         grant_type: "authorization_code",
       }),
     })
@@ -37,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     // TODO: Store tokens securely (in database or session)
     // For now, we'll redirect with success
-    const response = NextResponse.redirect(new URL("/dashboard/settings?success=connected", request.url))
+    const response = NextResponse.redirect(new URL("/dashboard/settings?success=connected", baseUrl))
 
     // Store tokens in cookies (in production, use a database)
     response.cookies.set("google_access_token", tokens.access_token, {
@@ -57,6 +68,6 @@ export async function GET(request: NextRequest) {
     return response
   } catch (error) {
     console.error("Error exchanging code for tokens:", error)
-    return NextResponse.redirect(new URL("/dashboard/settings?error=token_exchange_failed", request.url))
+    return NextResponse.redirect(new URL("/dashboard/settings?error=token_exchange_failed", baseUrl))
   }
 }
