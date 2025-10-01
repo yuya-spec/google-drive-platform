@@ -8,27 +8,37 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { useAuth } from "@/components/auth-provider"
 
 export function SigninForm() {
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   })
+  const { signIn } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError("")
 
-    // TODO: Implement signin logic
-    console.log("Signin data:", formData)
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const success = await signIn(formData.email, formData.password)
+      
+      if (success) {
+        // Redirect to dashboard after successful signin
+        window.location.href = "/dashboard"
+      } else {
+        setError("Invalid email or password. Please try again.")
+      }
+    } catch (error) {
+      console.error("Signin error:", error)
+      setError("An error occurred. Please try again.")
+    } finally {
       setIsLoading(false)
-      // Redirect to dashboard after successful signin
-      window.location.href = "/dashboard"
-    }, 1000)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,10 +52,15 @@ export function SigninForm() {
     <Card className="border-border shadow-lg">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
-        <CardDescription>Enter your credentials to access your account</CardDescription>
+        <CardDescription>Welcome back! Please sign in to your account</CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -60,12 +75,7 @@ export function SigninForm() {
             />
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link href="#" className="text-sm text-primary hover:underline">
-                Forgot password?
-              </Link>
-            </div>
+            <Label htmlFor="password">Password</Label>
             <Input
               id="password"
               name="password"

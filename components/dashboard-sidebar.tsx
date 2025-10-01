@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { LayoutDashboard, FolderOpen, Upload, Settings, LogOut, Menu, X } from "lucide-react"
 import { useState } from "react"
+import { useAuth } from "@/components/auth-provider"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -17,6 +18,20 @@ const navigation = [
 export function DashboardSidebar() {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { user, signOut } = useAuth()
+
+  const handleLogout = () => {
+    signOut()
+  }
+
+  const getUserInitials = (username: string) => {
+    return username
+      .split(' ')
+      .map(name => name.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
 
   return (
     <>
@@ -72,26 +87,27 @@ export function DashboardSidebar() {
 
           {/* User section */}
           <div className="p-4 border-t border-sidebar-border">
-            <div className="flex items-center gap-3 px-4 py-3 mb-2">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
-                JD
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-sidebar-foreground truncate">John Doe</p>
-                <p className="text-xs text-muted-foreground truncate">john@example.com</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50"
-              onClick={() => {
-                // TODO: Implement logout
-                window.location.href = "/signin"
-              }}
-            >
-              <LogOut className="h-5 w-5 mr-3" />
-              Logout
-            </Button>
+            {user && (
+              <>
+                <div className="flex items-center gap-3 px-4 py-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold">
+                    {getUserInitials(user.username)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-sidebar-foreground truncate">{user.username}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Logout
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </aside>

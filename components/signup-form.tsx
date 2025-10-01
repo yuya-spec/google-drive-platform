@@ -8,29 +8,46 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { useAuth } from "@/components/auth-provider"
 
 export function SignupForm() {
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
   })
+  const { signUp } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Check if password and confirm password match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match. Please try again.")
+      return
+    }
+    
     setIsLoading(true)
+    setError("")
 
-    // TODO: Implement signup logic
-    console.log("Signup data:", formData)
-
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const success = await signUp(formData.username, formData.email, formData.password)
+      
+      if (success) {
+        // Redirect to dashboard after successful signup
+        window.location.href = "/dashboard"
+      } else {
+        setError("Failed to create account. Please try again.")
+      }
+    } catch (error) {
+      console.error("Signup error:", error)
+      setError("An error occurred. Please try again.")
+    } finally {
       setIsLoading(false)
-      // Redirect to dashboard after successful signup
-      window.location.href = "/dashboard"
-    }, 1000)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,14 +65,19 @@ export function SignupForm() {
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+              {error}
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input
-              id="name"
-              name="name"
+              id="username"
+              name="username"
               type="text"
-              placeholder="John Doe"
-              value={formData.name}
+              placeholder="johndoe"
+              value={formData.username}
               onChange={handleChange}
               required
               disabled={isLoading}
