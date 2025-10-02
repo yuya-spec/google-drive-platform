@@ -1,29 +1,70 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FolderOpen, Upload, HardDrive, Clock } from "lucide-react"
+import { FolderOpen, Upload, HardDrive, Clock, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
+
+interface DriveStats {
+  totalFiles: string
+  storageUsed: string
+  storageTotal: string
+  recentUploads: string
+  lastActivity: string
+  user: string
+}
 
 export function DashboardContent() {
-  const stats = [
+  const [stats, setStats] = useState<DriveStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch("/api/drive/stats")
+        
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Failed to fetch statistics")
+        }
+        
+        const data = await response.json()
+        setStats(data)
+        setError(null)
+      } catch (err) {
+        console.error("Error fetching stats:", err)
+        setError(err instanceof Error ? err.message : "Failed to load statistics")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
+  const statsConfig = [
     {
-      title: "Total Files",
-      value: "0",
-      description: "Files in your drive",
+      title: "Total Items",
+      value: stats?.totalFiles || "0",
+      description: "Files and folders in your drive",
       icon: FolderOpen,
     },
     {
       title: "Storage Used",
-      value: "0 GB",
-      description: "of 15 GB available",
+      value: stats?.storageUsed || "0 GB",
+      description: `of ${ "15 GB"} available`,
       icon: HardDrive,
     },
     {
       title: "Recent Uploads",
-      value: "0",
+      value: stats?.recentUploads || "0",
       description: "in the last 7 days",
       icon: Upload,
     },
     {
       title: "Last Activity",
-      value: "Just now",
+      value: stats?.lastActivity || "No activity",
       description: "Last file access",
       icon: Clock,
     },
@@ -34,21 +75,45 @@ export function DashboardContent() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's an overview of your Google Drive.</p>
+        <p className="text-muted-foreground">
+          Welcome back{stats?.user ? `, ${stats.user}` : ""}! Here's an overview of your Google Drive.
+        </p>
       </div>
+
+      {/* Error State */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-800 text-sm">
+            <strong>Error loading statistics:</strong> {error}
+          </p>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => {
+        {statsConfig.map((stat) => {
           const Icon = stat.icon
           return (
             <Card key={stat.title} className="border-border">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                {loading ? (
+                  <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                ) : (
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                )}
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+                <div className="text-2xl font-bold text-foreground">
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="text-sm">Loading...</span>
+                    </div>
+                  ) : (
+                    stat.value
+                  )}
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
               </CardContent>
             </Card>

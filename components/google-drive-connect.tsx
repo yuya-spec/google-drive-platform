@@ -44,12 +44,26 @@ export function GoogleDriveConnect() {
     window.location.href = "/api/auth/google"
   }
 
-  const handleDisconnect = () => {
-    // Clear cookies by setting them to expire
-    document.cookie = "google_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-    document.cookie = "google_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-    setIsConnected(false)
-    setMessage({ type: "success", text: "Disconnected from Google Drive" })
+  const handleDisconnect = async () => {
+    try {
+      const response = await fetch("/api/auth/google/disconnect", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (response.ok) {
+        setIsConnected(false)
+        setMessage({ type: "success", text: "Disconnected from Google Drive" })
+      } else {
+        const errorData = await response.json()
+        setMessage({ type: "error", text: errorData.message || "Failed to disconnect from Google Drive" })
+      }
+    } catch (error) {
+      console.error("Disconnect error:", error)
+      setMessage({ type: "error", text: "Failed to disconnect from Google Drive" })
+    }
   }
 
   return (
