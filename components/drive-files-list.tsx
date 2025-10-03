@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { FileIcon, FolderOpen, RefreshCw, ExternalLink, ChevronLeft, Home } from "lucide-react"
@@ -22,6 +23,7 @@ interface BreadcrumbItem {
 }
 
 export function DriveFilesList() {
+  const router = useRouter()
   const [files, setFiles] = useState<DriveFile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +46,8 @@ export function DriveFilesList() {
       setFiles(data.files || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load files")
+      // Navigate to settings page when fetch fails
+      router.push("/dashboard/settings")
     } finally {
       setLoading(false)
     }
