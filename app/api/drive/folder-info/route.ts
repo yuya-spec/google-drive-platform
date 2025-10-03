@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
   try {
     // First attempt with current access token
     let response = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,parents`,
+      `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,parents&supportsAllDrives=true`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         
         // Retry the request with new token
         response = await fetch(
-          `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,parents`,
+          `https://www.googleapis.com/drive/v3/files/${folderId}?fields=id,name,parents&supportsAllDrives=true`,
           {
             headers: {
               Authorization: `Bearer ${newAccessToken}`,

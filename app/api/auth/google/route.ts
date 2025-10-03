@@ -5,7 +5,7 @@ export async function GET() {
   const clientId = process.env.GOOGLE_CLIENT_ID
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:4000"
   const redirectUri = `${appUrl}/api/auth/google/callback`
-  const scope = "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file"
+  const scope = "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive"
 
   if (!clientId) {
     return NextResponse.json({ error: "Google Client ID not configured" }, { status: 500 })

@@ -16,7 +16,7 @@ export function GoogleDriveConnect() {
 
     if (success === "connected") {
       setIsConnected(true)
-      setMessage({ type: "success", text: "Successfully connected to Google Drive!" })
+      setMessage({ type: "success", text: "Successfully connected to shared Google Drive folder!" })
       // Clean up URL
       window.history.replaceState({}, "", window.location.pathname)
     } else if (error) {
@@ -32,7 +32,7 @@ export function GoogleDriveConnect() {
           setIsConnected(true)
         } else if (res.status === 401) {
           setIsConnected(false)
-          setMessage({ type: "error", text: "Authentication expired. Please reconnect." })
+          setMessage({ type: "error", text: "Authentication expired. Please reconnect to the shared folder." })
         }
       })
       .catch(() => {
@@ -55,14 +55,14 @@ export function GoogleDriveConnect() {
 
       if (response.ok) {
         setIsConnected(false)
-        setMessage({ type: "success", text: "Disconnected from Google Drive" })
+        setMessage({ type: "success", text: "Disconnected from shared Google Drive folder" })
       } else {
         const errorData = await response.json()
-        setMessage({ type: "error", text: errorData.message || "Failed to disconnect from Google Drive" })
+        setMessage({ type: "error", text: errorData.message || "Failed to disconnect from shared Google Drive folder" })
       }
     } catch (error) {
       console.error("Disconnect error:", error)
-      setMessage({ type: "error", text: "Failed to disconnect from Google Drive" })
+      setMessage({ type: "error", text: "Failed to disconnect from shared Google Drive folder" })
     }
   }
 
@@ -90,7 +90,7 @@ export function GoogleDriveConnect() {
             disabled={isConnected}
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
-            {isConnected ? "Connected" : "Connect Google Drive"}
+            {isConnected ? "Connected" : "Connect to Shared Folder"}
           </Button>
           {isConnected && (
             <Button

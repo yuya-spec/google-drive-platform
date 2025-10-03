@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
   // Get folder ID from query parameters
   const { searchParams } = new URL(request.url)
-  const folderId = searchParams.get("folderId") || "root"
+  const folderId = searchParams.get("folderId") || process.env.SHARED_GOOGLE_DRIVE_FOLDER_ID || "root"
 
   try {
     // Build query parameters for Google Drive API
@@ -51,7 +51,9 @@ export async function GET(request: NextRequest) {
       fields: "files(id,name,mimeType,modifiedTime,size,webViewLink,iconLink,parents)",
       q: folderId === "root" 
         ? "'root' in parents and trashed=false"
-        : `'${folderId}' in parents and trashed=false`
+        : `'${folderId}' in parents and trashed=false`,
+      includeItemsFromAllDrives: "true",
+      supportsAllDrives: "true"
     })
 
     // First attempt with current access token

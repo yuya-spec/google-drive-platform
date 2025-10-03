@@ -28,7 +28,7 @@ export function DriveFilesList() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [currentFolderId, setCurrentFolderId] = useState<string>("root")
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([{ id: "root", name: "My Drive" }])
+  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([{ id: "root", name: "Shared Folder" }])
 
   const fetchFiles = async (folderId: string = currentFolderId) => {
     setLoading(true)
